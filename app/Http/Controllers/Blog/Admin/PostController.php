@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Blog\Admin;
 
+use App\Models\BlogPost;
 use App\Repositories\BlogPostRepository;
 use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
-use Carbon\Carbon;
+use App\Http\Requests\BlogPostCreateRequest;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
+//use Illuminate\Http\Request;
 
 class PostController extends BaseController
 {
@@ -46,7 +48,10 @@ class PostController extends BaseController
      */
     public function create()
     {
-        //
+        $item = new BlogPost();
+        $categoryList = BlogPost::all();
+
+        return view('blog.admin.posts.edit', compact('item', 'categoryList'));
     }
 
     /**
@@ -55,9 +60,24 @@ class PostController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BlogPostCreateRequest $request)
     {
-        //
+        $data = $request->input(); //отримаємо масив даних, які надійшли з форми
+        if (empty($data['slug'])) { //якщо псевдонім порожній
+            $data['slug'] = Str::slug($data['title']); //генеруємо псевдонім
+        }
+
+        $item = (new BlogPost())->create($data); //створюємо об'єкт і додаємо в БД
+
+        if ($item) {
+            return redirect()
+                ->route('blog.admin.posts.edit', [$item->id])
+                ->with(['success' => 'Успішно збережено']);
+        } else {
+            return back()
+                ->withErrors(['msg' => 'Помилка збереження'])
+                ->withInput();
+        }
     }
 
     /**
@@ -106,12 +126,6 @@ class PostController extends BaseController
 
         $data = $request->all(); //отримаємо масив даних, які надійшли з форми
 
-        if (empty($data['slug'])) { //якщо псевдонім порожній
-            $data['slug'] = Str::slug($data['title']); //генеруємо псевдонім
-        }
-        if (empty($item->published_at) && $data['is_published']) { //якщо поле published_at порожнє і нам прийшло 1 в ключі is_published, то
-            $data['published_at'] = Carbon::now(); //генеруємо поточну дату
-        }
         $result = $item->update($data); //оновлюємо дані об'єкта і зберігаємо в БД
 
         if ($result) {
@@ -131,8 +145,17 @@ class PostController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id)        //????????
     {
-        //
+       /**
+       $item = BlogPost($id);
+        $item->delete();
+
+        if($item->delete()) {
+            return redirect()
+                ->route('blog.admin.posts', $item->id)
+                ->with(['msg' => 'Успішно видалено']);
+        }
+       */
     }
 }
