@@ -49,7 +49,7 @@ class PostController extends BaseController
     public function create()
     {
         $item = new BlogPost();
-        $categoryList = BlogPost::all();
+        $categoryList = $this->blogCategoryRepository->getForComboBox();
 
         return view('blog.admin.posts.edit', compact('item', 'categoryList'));
     }
@@ -63,9 +63,6 @@ class PostController extends BaseController
     public function store(BlogPostCreateRequest $request)
     {
         $data = $request->input(); //отримаємо масив даних, які надійшли з форми
-        if (empty($data['slug'])) { //якщо псевдонім порожній
-            $data['slug'] = Str::slug($data['title']); //генеруємо псевдонім
-        }
 
         $item = (new BlogPost())->create($data); //створюємо об'єкт і додаємо в БД
 
@@ -147,15 +144,17 @@ class PostController extends BaseController
      */
     public function destroy($id)        //????????
     {
-       /**
-       $item = BlogPost($id);
-        $item->delete();
+        $result = BlogPost::destroy($id); //софт деліт, запис лишається
 
-        if($item->delete()) {
+        //$result = BlogPost::find($id)->forceDelete(); //повне видалення з БД
+
+        if ($result) {
             return redirect()
-                ->route('blog.admin.posts', $item->id)
-                ->with(['msg' => 'Успішно видалено']);
+                ->route('blog.admin.posts.index')
+                ->with(['success' => "Запис id[$id] видалено"]);
+        } else {
+            return back()
+                ->withErrors(['msg' => 'Помилка видалення']);
         }
-       */
     }
 }
