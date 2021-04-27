@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BlogPost extends Model
 {   use SoftDeletes;
+    use HasFactory;
     const UNKNOWN_USER = 1;
     protected $fillable
         = [
@@ -20,7 +21,6 @@ class BlogPost extends Model
             'published_at',
             'content_html',
         ];
-    protected $dates = ['deleted_at']; //???
     /**
      * Категорія статті
      *
@@ -42,5 +42,4 @@ class BlogPost extends Model
         //стаття належить користувачу
         return $this->belongsTo(User::class);
     }
-    use HasFactory;
 }
