@@ -6,6 +6,9 @@
             <tr>
                 <td>{{$item->id}}</td>
                 <td>{{$item->title}}</td>
+                <td>{{$loop->index+1}}</td>
+                <td>{{$item->user->name}}&nbsp;&nbsp;&nbsp;</td>
+                <td><a href="{{ route('blog.posts.show', $item->id) }}">{{ $item->title }}</a></td>
                 <td>{{$item->created_at}}</td>
             </tr>
         @endforeach

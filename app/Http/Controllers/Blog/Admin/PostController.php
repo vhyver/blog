@@ -8,6 +8,7 @@ use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
 use App\Http\Requests\BlogPostCreateRequest;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use App\Jobs\BlogPostAfterCreateJob;
 use App\Jobs\BlogPostAfterDeleteJob;
@@ -38,10 +39,15 @@ class PostController extends BaseController
      */
     public function index()
     {
+        if(!Gate::allows('open', auth()->id())){
+            return redirect()->route('blog.posts.index');
+        }
+
         $paginator = $this->blogPostRepository->getAllWithPaginate();
 
         return view('blog.admin.posts.index', compact('paginator'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -89,7 +95,8 @@ class PostController extends BaseController
      */
     public function show($id)
     {
-        //
+        $item = BlogPost::find($id);
+        return view('blog.posts.post', compact('item'));
     }
 
     /**
@@ -100,6 +107,9 @@ class PostController extends BaseController
      */
     public function edit($id)
     {
+        if(!Gate::allows('open', auth()->id())){
+            return redirect()->route('blog.posts.index');
+        }
         $item = $this->blogPostRepository->getEdit($id);
         if (empty($item)) {                         //помилка, якщо репозиторій не знайде наш ід
             abort(404);

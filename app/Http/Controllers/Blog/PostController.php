@@ -48,7 +48,9 @@ class PostController extends BaseController
      */
     public function show($id)
     {
-        //
+        $item = BlogPost::find($id);
+
+        return view('blog.posts.post', compact('item'));
     }
 
     /**
